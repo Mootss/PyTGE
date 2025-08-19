@@ -55,6 +55,7 @@ class Screen():
             #print(lines)
         window = "\n".join(lines)
         print(window)
+        print(f"\033[{(self.height / 2)+2};1H\033[0J", end="")
         self.reset()
 
     def reset(self):

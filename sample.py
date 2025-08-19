@@ -30,6 +30,7 @@ def game():
     running = True
     prevTime = time.time()
     FPS = 1
+    move = "You haven't moved yet! use arrow keys to move!"
 
     while running == True:
 
@@ -41,21 +42,27 @@ def game():
 
             elif key in ["H", "A"]: # up
                 mario.move("up", 1)
-                print("up")
+                move = "up"
 
             elif key in ["P", "B"]: # down
                 mario.move("down", 1)
-                print("down")
+                move = "down"
 
             elif key in ["M", "C"]: # right
                 mario.move("right", 1)
-                print("right")
+                move = "right"
 
             elif key in ["K", "D"]: # left
                 mario.move("left", 1)
-                print("left")
+                move = "left"
 
             # H P M K is for windows, A B C D is for unix
+        
+        # draw the shits
+        screen.drawSprite(mario) # this inserts the sprite into the screen array but doesnt actually print to terminal
+        screen.render() # this prints the "pixel screen"
+        
+        # --------------- I RECOMMEND PUTTING ALL PRINT STATEMENTS AFTER screen.render() ---------------------------
 
         # debugging stuff
         #time.sleep(0.05) # control framerate
@@ -66,16 +73,10 @@ def game():
             currentFPS = 1 / dt
             FPS = 0.9 * FPS + 0.1 * currentFPS  
 
-        print(f"""
-              
-FPS: {FPS:.2f}
-X: {mario.posX} Y: {mario.posY}
-click 'q' to quit
-""")
+        print(f"FPS: {FPS:.2f}")
+        print(f"X: {mario.posX} Y: {mario.posY}")
+        print(f"move: {move}")
+        print("click 'q' to quit")
         FPS+=1
 
-        # draw the shits
-        screen.drawSprite(mario) # this inserts the sprite into the screen array but doesnt actually show it on terminal
-        screen.render() # this prints the "screen"
-    
 game()
