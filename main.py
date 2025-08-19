@@ -65,11 +65,11 @@ class Screen():
         self.displayArray = [row[:] for row in self.array]
 
     def drawSprite(self, sprite):
-        # todo: make it so it doenst insert transparent pixels
         # todo: add a check to see if there is enough space to insert the sprite
         for row in range(len(sprite.array)):
-            self.displayArray[sprite.posY + row][sprite.posX:(sprite.posX + len(sprite.array[row]))] = sprite.array[row]
-            # basically, take a section of display array and replace it w sprite   
+            for e in range(len(sprite.array[row])):
+                if sprite.array[row][e] != -1:
+                    self.displayArray[sprite.posY + row][sprite.posX + e] = sprite.array[row][e]
         
 
 class Sprite():
