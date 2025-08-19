@@ -1,10 +1,12 @@
 from main import *
+import time
 
 # set up the screen here
 screen = Screen(
     colorMode=256,
     height=32,
     width=64,
+    # heigth and width must be an even number
     color=59
     # in 8 colorMode to set red u will write color=1, bec 1 is red, bec 41 and 31 is red. in 8 colormode only use the last digit 
 )

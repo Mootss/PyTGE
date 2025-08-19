@@ -1,15 +1,3 @@
-# 18/8/25
-# to do:
-# implement transparent pixels (impotrant)
-# add option to modify screen border behaviour, aka when sprite hit end of array
-# add option load a background image into bg array
-# handle odd arays for bg array
-# fix displaying text
-# add sprite collision detection
-# make minecraft?
-
-#from random import choice
-import time
 import sys
 import os
 
@@ -42,7 +30,6 @@ class Screen():
             raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
     
     def render(self): # convert array to ansi & print it
-        # todo: add a way to render transparent pixels aka no color pixels
         print("\033[2;1H", end="")
         lines = []
         pixels = []
@@ -63,7 +50,6 @@ class Screen():
         self.displayArray = [row[:] for row in self.array]
 
     def drawSprite(self, sprite):
-        # todo: add a check to see if there is enough space to insert the sprite
         for row in range(len(sprite.array)):
             for e in range(len(sprite.array[row])):
                 if sprite.array[row][e] != -1:
