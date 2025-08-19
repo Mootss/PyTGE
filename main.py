@@ -13,8 +13,8 @@ import time
 import sys
 import os
 
-def createShape():
-    pass
+def createShape(color, width, height): # 2d array
+    return [[color for x in range(width)] for y in range(height)]
 
 class Screen():
     uhb = "\u2580" # upper half block ▀
@@ -28,13 +28,10 @@ class Screen():
         self.height = height
         self.width = width
         self.color = color # if undefined, default = black
-        self.array = self.createArray()
+        self.array = createShape(self.color, self.width, self.height)
         self.displayArray = [row[:] for row in self.array]
         # sprite eh draw kuran v ma do it by modifying display array instead of og array, so og array can be re-used when a sprite is moved
         # im sure theres a more efficient way to do ts but my sikundi too smol
-
-    def createArray(self): # 2d array
-        return [[self.color for x in range(self.width)] for y in range(self.height)]
 
     def draw(self, fg, bg): # draws 1 character (which is 2 px)
         if self.colorMode == 8:
