@@ -61,6 +61,8 @@ class Sprite():
         self.array = array
         self.posX = posX
         self.posY = posY
+        self.height = len(self.array)
+        self.width = len(self.array[0])
 
     def move(self, direction, i): # i = increment amount
         direction = direction.lower()
@@ -79,15 +81,39 @@ class Sprite():
         else:
             raise ValueError("ERROR: Invalid direction, accepted directions are: 'up', 'down', 'right', 'left'")
         
+    def checkCollision(self, otherSprite):
+        # using AABB method
+        if ((((self.posX + self.width) > otherSprite.posX) and (self.posX < (otherSprite.posX + otherSprite.width)))
+                                                            and 
+            (((self.posY + self.height) > otherSprite.posY) and (self.posY < (otherSprite.posY + otherSprite.height)))):
+            
+            return True # return true IF this sprite is colliding with another sprite
+        
     def flip():
         pass
     
     def rotate():
         pass
 
+
 class InputHandler():
     #not sure how to write ts
     pass
+
+
+
+# square1 = [[1, 1, 3, 1, 1],
+#            [1,-1,-1,-1, 1],
+#            [3,-1,-1,-1, 3],
+#            [1,-1,-1,-1, 1],
+#            [1, 1, 3, 1, 1]]
+
+# square2 = [[4, 4, 6, 4, 4],
+#            [4,-1,-1,-1, 4],
+#            [6,-1,-1,-1, 6],
+#            [4,-1,-1,-1, 4],
+#            [4, 4, 6, 4, 4]]
+
 
 
 # input handling, stole this from stackoverflow heh
