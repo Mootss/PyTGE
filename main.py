@@ -1,9 +1,6 @@
 import sys
 import os
 
-def createShape(color, width, height): # 2d array
-    return [[color for x in range(width)] for y in range(height)]
-
 class Screen():
     uhb = "\u2580" # upper half block ▀
     #bit3 = "\u001b"
@@ -21,80 +18,108 @@ class Screen():
         # sprite eh draw kuran v ma do it by modifying display array instead of og array, so og array can be re-used when a sprite is moved
         # im sure theres a more efficient way to do ts but my sikundi too smol
 
-    def draw(self, fg, bg): # draws 1 character (which is 2 px)
-        if self.colorMode == 8:
-            return f"\u001b[3{fg}m\u001b[4{bg}m{self.uhb}\u001b[0m" # \u001b[0m actually only needs to be written at the end of each line but wtver
-        elif self.colorMode == 256:
-            return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\u001b[0m"
-        else:
-            raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
+    # def draw(self, fg, bg): # draws 1 character (which is 2 px)
+    #     if self.colorMode == 8:
+    #         return f"\u001b[3{fg}m\u001b[4{bg}m{self.uhb}\u001b[0m" # \u001b[0m actually only needs to be written at the end of each line but wtver
+    #     elif self.colorMode == 256:
+    #         return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\u001b[0m"
+    #     else:
+    #         raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
     
-    def render(self): # convert array to ansi & print it
-        print("\033[2;1H", end="")
-        lines = []
-        pixels = []
-        for y in range(0, len(self.displayArray), 2):
-            for fg, bg in zip(self.displayArray[y], self.displayArray[y+1]):
-                pixels.append(self.draw(fg, bg))
-                #print(draw(fg, bg))
-            lines.append("".join(pixels))
-            pixels = []
-            #print(lines)
-        window = "\n".join(lines)
-        print(window)
-        print(f"\033[{(self.height / 2)+2};1H\033[0J", end="")
-        self.reset()
+    # def render(self): # convert array to ansi & print it
+    #     print("\033[2;1H", end="")
+    #     lines = []
+    #     pixels = []
+    #     for y in range(0, len(self.displayArray), 2):
+    #         for fg, bg in zip(self.displayArray[y], self.displayArray[y+1]):
+    #             pixels.append(self.draw(fg, bg))
+    #             #print(draw(fg, bg))
+    #         lines.append("".join(pixels))
+    #         pixels = []
+    #         #print(lines)
+    #     window = "\n".join(lines)
+    #     print(window)
+    #     print(f"\033[{(self.height / 2)+2};1H\033[0J", end="")
+    #     self.reset()
 
-    def reset(self):
-        #self.displayArray = [[e for e in row] for row in self.array]
-        self.displayArray = [row[:] for row in self.array]
+    # def reset(self):
+    #     #self.displayArray = [[e for e in row] for row in self.array]
+    #     self.displayArray = [row[:] for row in self.array]
 
-    def drawSprite(self, sprite):
-        for row in range(len(sprite.array)):
-            for e in range(len(sprite.array[row])):
-                if sprite.array[row][e] != -1:
-                    self.displayArray[sprite.posY + row][sprite.posX + e] = sprite.array[row][e]
+    # def drawSprite(self, sprite):
+    #     for row in range(len(sprite.array)):
+    #         for e in range(len(sprite.array[row])):
+    #             if sprite.array[row][e] != -1:
+    #                 self.displayArray[sprite.posY + row][sprite.posX + e] = sprite.array[row][e]
         
+class Layer():
 
-class Sprite():
-    def __init__(self, array, posX, posY):
-        self.array = array
-        self.posX = posX
-        self.posY = posY
-        self.height = len(self.array)
-        self.width = len(self.array[0])
+    def __init__(self, pos, size, collision_box, children):
+        self.pos = pos
+        self.size = size
+        if collision_box:
+            self.collision_box = collision_box
+        self.children = [] or children
 
     def move(self, direction, i): # i = increment amount
-        direction = direction.lower()
+        match direction.lower():
+            case "up":
+                self.posY -= i
+            case "down":
+                self.posY += i
+            case "right":
+                self.posX += i
+            case "left":
+                self.posX -= i
+            case _:
+                raise ValueError("ERROR: Invalid direction, accepted directions are: 'up', 'down', 'right', 'left'")
 
-        if direction == "up":
-            self.posY -= i
-        
-        elif direction == "down":
-            self.posY += i
+    # TODO: this will be handled by a layer manager or whatever and call on_collision for the collided objects
+    # def checkCollision(self, otherSprite):
+    #     # using AABB method
+    #     if ((((self.posX + self.width) > otherSprite.posX) and (self.posX < (otherSprite.posX + otherSprite.width)))
+    #                                                         and 
+    #         (((self.posY + self.height) > otherSprite.posY) and (self.posY < (otherSprite.posY + otherSprite.height)))):
 
-        elif direction == "right":
-            self.posX += i
+    #         return True # return true IF this sprite is colliding with another sprite
 
-        elif direction == "left":
-            self.posX -= i
-        else:
-            raise ValueError("ERROR: Invalid direction, accepted directions are: 'up', 'down', 'right', 'left'")
-        
-    def checkCollision(self, otherSprite):
-        # using AABB method
-        if ((((self.posX + self.width) > otherSprite.posX) and (self.posX < (otherSprite.posX + otherSprite.width)))
-                                                            and 
-            (((self.posY + self.height) > otherSprite.posY) and (self.posY < (otherSprite.posY + otherSprite.height)))):
-            
-            return True # return true IF this sprite is colliding with another sprite
-        
-    def flip():
+class PixelSprite(Layer):
+
+    def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
+        super().__init__(pos, size, collision_box, children)
+        self.frames = frames
+        self.frame_id = frame_id
+
+        self.flipX = False
+        self.flipY = False
+    def draw(self, parent):
         pass
-    
-    def rotate():
+
+class TextSprite(Layer):
+
+    def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
+        super().__init__(pos, size, collision_box, children)
+        self.frames = frames
+        self.frame_id = frame_id
+
+    def draw(self, parent):
         pass
 
+class TextBox(Layer):
+    def __init__(self, pos, size, collision_box, children, text):
+        super().__init__(pos, size, collision_box, children)
+        self.text = text
+
+    def draw(self, parent):
+        pass
+
+class FillBox(Layer):
+    def __init__(self, pos, size, collision_box, children, color):
+        super().__init__(pos, size, collision_box, children)
+        self.color = color
+
+    def draw(self, parent):
+        pass
 
 class InputHandler():
     #not sure how to write ts
