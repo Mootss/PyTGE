@@ -26,7 +26,18 @@ class Screen():
     #         for e in range(len(sprite.array[row])):
     #             if sprite.array[row][e] != -1:
     #                 self.displayArray[sprite.posY + row][sprite.posX + e] = sprite.array[row][e]
-        
+
+class Point():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+class Box():
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
 class Layer():
 
     def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
@@ -38,41 +49,21 @@ class Layer():
         self.frames = frames
         self.frame_id = frame_id
 
+    def get_frame(self, id=None):
+        return self.frames[id or self.frame_id]
+
     def move(self, direction, i): # i = increment amount
         match direction.lower():
             case "up":
-                self.posY -= i
+                self.pos.y -= i
             case "down":
-                self.posY += i
+                self.pos.y += i
             case "right":
-                self.posX += i
+                self.pos.x += i
             case "left":
-                self.posX -= i
+                self.pos.x -= i
             case _:
                 raise ValueError("ERROR: Invalid direction, accepted directions are: 'up', 'down', 'right', 'left'")
-
-    def draw_char(self, fg, bg): # draws 1 character (which is 2 px)
-        if self.screen.colorMode == 8:
-            return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m" # \033[0m actually only needs to be written at the end of each line but wtver
-        elif self.screen.colorMode == 256:
-            return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\033[0m"
-        else:
-            raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
-
-    def render(self): # convert array to ansi & print it
-        lines = []
-        pixels = []
-        # print("\033[2;1H", end="")
-        for y in range(0, len(self.frames[self.frame_id]), 2):
-            for fg, bg in zip(self.frames[self.frame_id][y], self.frames[self.frame_id][y+1]):
-                pixels.append(self.draw_char(fg, bg))
-                #print(draw_char(fg, bg))
-            lines.append("".join(pixels))
-            pixels = []
-            #print(lines)
-        window = "\n".join(lines)
-        print(window)
-        print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
     # TODO: this will be handled by a layer manager or whatever and call on_collision for the collided objects
     # def checkCollision(self, otherSprite):
@@ -91,6 +82,59 @@ class PixelSprite(Layer):
         self.uhb = "\u2580" # upper half block ▀
         self.flipX = False
         self.flipY = False
+
+    def render_char(self, x, y): # draws 1 character (which is 2 px)
+        frame = self.render_pixels()
+        fg = frame[max(0, y*2)][x]
+        bg = frame[max(0, y*2+1)][x]
+        if self.screen.colorMode == 8:
+            return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m" # \033[0m actually only needs to be written at the end of each line but wtver
+        elif self.screen.colorMode == 256:
+            return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\033[0m"
+        else:
+            raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
+
+    def render_pixels(self): # convert array to ansi & print it
+        frame = [list(line) for line in self.get_frame()]
+        for child in self.children:
+            if child.frames:
+                child_frame = child.render_pixels()
+                # print(child_frame)
+                for relative_y, absolute_y in enumerate(range(child.pos.y, child.pos.y+child.size.y)):
+                    if absolute_y <= (len(frame) - 1):
+                        for relative_x, absolute_x in enumerate(range(child.pos.x, child.pos.x+child.size.x)):
+                            if absolute_x <= (len(frame[absolute_y]) - 1):
+                                # print(x, y)
+                                # print(len(frame[y]))
+                                frame[absolute_y][absolute_x] = child_frame[relative_y][relative_x]
+        if self.flipX:
+            frame.reverse()
+        if self.flipY:
+            for line in frame:
+                line.reverse()
+        return frame
+
+    def draw(self): # convert array to ansi & print it
+        frame = self.render_pixels()
+        lines = []
+
+        for y in range(len(frame) // 2):
+            chars = ""
+            for x in range(len(frame[y])):
+                # print(x, y)
+                chars += self.render_char(x, y)
+            lines.append(chars)
+        # sys.stdout.write("\033[2J")
+        sys.stdout.write("\033[H")
+        sys.stdout.write(f"\033[{self.pos.y};{self.pos.x}H")
+        width = len(lines[0])
+        for i, l in enumerate(lines):
+            sys.stdout.write(l)
+            sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
+            # sys.stdout.write(f"\033[{self.pos.y + i};{self.pos.x}H")
+        # sys.stdout.write("\033[10;10H")
+        sys.stdout.flush()
+        # print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
 class TextSprite(Layer):
 
@@ -112,7 +156,7 @@ class TextBox(Layer):
 class FillBox(PixelSprite):
 
     def __init__(self, pos, size, collision_box, children, color):
-        frames = (tuple(tuple(color for x in range(size[0])) for y in range(size[1])),)
+        frames = (tuple(tuple(color for x in range(size.x)) for y in range(size.y)),)
         super().__init__(pos, size, collision_box, children, frames)
         self.color = color
 
@@ -123,8 +167,8 @@ class Game():
         self._process = process
 
     def start(self):
-        self._ready()
-        while not self._process(): # return True to quit
+        self._ready(self)
+        while not self._process(self): # return True to quit
             pass
 
 class InputHandler():
