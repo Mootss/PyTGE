@@ -2,8 +2,7 @@ import sys
 import os
 
 class Screen():
-    uhb = "\u2580" # upper half block ▀
-    #bit3 = "\u001b"
+    #bit3 = "\033"
     #bit8 = "\033[38;5;0m"
 
     def __init__(self, colorMode, height, width, color=0):
@@ -13,34 +12,10 @@ class Screen():
         self.height = height
         self.width = width
         self.color = color # if undefined, default = black
-        self.array = createShape(self.color, self.width, self.height)
-        self.displayArray = [row[:] for row in self.array]
+        # self.array = createShape(self.color, self.width, self.height)
+        # self.displayArray = [row[:] for row in self.array]
         # sprite eh draw kuran v ma do it by modifying display array instead of og array, so og array can be re-used when a sprite is moved
         # im sure theres a more efficient way to do ts but my sikundi too smol
-
-    # def draw(self, fg, bg): # draws 1 character (which is 2 px)
-    #     if self.colorMode == 8:
-    #         return f"\u001b[3{fg}m\u001b[4{bg}m{self.uhb}\u001b[0m" # \u001b[0m actually only needs to be written at the end of each line but wtver
-    #     elif self.colorMode == 256:
-    #         return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\u001b[0m"
-    #     else:
-    #         raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
-    
-    # def render(self): # convert array to ansi & print it
-    #     print("\033[2;1H", end="")
-    #     lines = []
-    #     pixels = []
-    #     for y in range(0, len(self.displayArray), 2):
-    #         for fg, bg in zip(self.displayArray[y], self.displayArray[y+1]):
-    #             pixels.append(self.draw(fg, bg))
-    #             #print(draw(fg, bg))
-    #         lines.append("".join(pixels))
-    #         pixels = []
-    #         #print(lines)
-    #     window = "\n".join(lines)
-    #     print(window)
-    #     print(f"\033[{(self.height / 2)+2};1H\033[0J", end="")
-    #     self.reset()
 
     # def reset(self):
     #     #self.displayArray = [[e for e in row] for row in self.array]
@@ -54,12 +29,14 @@ class Screen():
         
 class Layer():
 
-    def __init__(self, pos, size, collision_box, children):
+    def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
         self.pos = pos
         self.size = size
         if collision_box:
             self.collision_box = collision_box
         self.children = [] or children
+        self.frames = frames
+        self.frame_id = frame_id
 
     def move(self, direction, i): # i = increment amount
         match direction.lower():
@@ -74,6 +51,29 @@ class Layer():
             case _:
                 raise ValueError("ERROR: Invalid direction, accepted directions are: 'up', 'down', 'right', 'left'")
 
+    def draw_char(self, fg, bg): # draws 1 character (which is 2 px)
+        if self.screen.colorMode == 8:
+            return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m" # \033[0m actually only needs to be written at the end of each line but wtver
+        elif self.screen.colorMode == 256:
+            return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\033[0m"
+        else:
+            raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
+
+    def render(self): # convert array to ansi & print it
+        lines = []
+        pixels = []
+        # print("\033[2;1H", end="")
+        for y in range(0, len(self.frames[self.frame_id]), 2):
+            for fg, bg in zip(self.frames[self.frame_id][y], self.frames[self.frame_id][y+1]):
+                pixels.append(self.draw_char(fg, bg))
+                #print(draw_char(fg, bg))
+            lines.append("".join(pixels))
+            pixels = []
+            #print(lines)
+        window = "\n".join(lines)
+        print(window)
+        print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
+
     # TODO: this will be handled by a layer manager or whatever and call on_collision for the collided objects
     # def checkCollision(self, otherSprite):
     #     # using AABB method
@@ -86,26 +86,22 @@ class Layer():
 class PixelSprite(Layer):
 
     def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
-        super().__init__(pos, size, collision_box, children)
-        self.frames = frames
-        self.frame_id = frame_id
+        super().__init__(pos, size, collision_box, children, frames, frame_id)
 
+        self.uhb = "\u2580" # upper half block ▀
         self.flipX = False
         self.flipY = False
-    def draw(self, parent):
-        pass
 
 class TextSprite(Layer):
 
     def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
         super().__init__(pos, size, collision_box, children)
-        self.frames = frames
-        self.frame_id = frame_id
 
     def draw(self, parent):
         pass
 
 class TextBox(Layer):
+
     def __init__(self, pos, size, collision_box, children, text):
         super().__init__(pos, size, collision_box, children)
         self.text = text
@@ -113,13 +109,23 @@ class TextBox(Layer):
     def draw(self, parent):
         pass
 
-class FillBox(Layer):
+class FillBox(PixelSprite):
+
     def __init__(self, pos, size, collision_box, children, color):
-        super().__init__(pos, size, collision_box, children)
+        frames = (tuple(tuple(color for x in range(size[0])) for y in range(size[1])),)
+        super().__init__(pos, size, collision_box, children, frames)
         self.color = color
 
-    def draw(self, parent):
-        pass
+class Game():
+
+    def __init__(self, ready, process):
+        self._ready = ready
+        self._process = process
+
+    def start(self):
+        self._ready()
+        while not self._process(): # return True to quit
+            pass
 
 class InputHandler():
     #not sure how to write ts
