@@ -53,7 +53,7 @@ def ready(game):
         Mario()
     ], color=59)
     game.box.screen = screen
-    game.textbox = TextBox((66, 7), (29, 5), None, [], text=["123","45678","90"]) 
+    game.textbox = TextBox((66, 7), (26, 5), None, [], text=["123","45678","90"]) 
     game.textbox.screen = screen
 
 def process(game):

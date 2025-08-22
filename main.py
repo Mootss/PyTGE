@@ -114,7 +114,7 @@ class PixelSprite(Layer):
         sys.stdout.write("\033[H")
         sys.stdout.write(f"\033[{self.pos.y};{self.pos.x}H")
         width = len(lines[0])
-        for i, l in enumerate(lines):
+        for l in lines:
             sys.stdout.write(l)
             sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
         sys.stdout.flush()
@@ -168,8 +168,8 @@ class TextBox(Layer):
         sys.stdout.write("\033[H")
         sys.stdout.write(f"\033[{self.pos.y};{self.pos.x}H")
         width = len(lines[0])
-        for i, l in enumerate(lines):
-            sys.stdout.write(l)
+        for l in lines:
+            sys.stdout.write(l[:self.size.x])
             sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
         sys.stdout.flush()
         # print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
