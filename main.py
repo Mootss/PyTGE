@@ -92,13 +92,6 @@ class PixelSprite(Layer):
                     and 0 <= x1 < self.size.x \
                     and pixel != -1:
                         frame[y1][x1] = pixel
-                # for relative_y, absolute_y in enumerate(range(child.pos.y, child.pos.y+child.size.y)):
-                #     if absolute_y <= (len(frame) - 1):
-                #         for relative_x, absolute_x in enumerate(range(child.pos.x, child.pos.x+child.size.x)):
-                #             if absolute_x <= (len(frame[absolute_y]) - 1):
-                #                 # print(x, y)
-                #                 # print(len(frame[y]))
-                #                 frame[absolute_y][absolute_x] = child_frame[relative_y][relative_x]
         if self.flipY:
             frame.reverse()
         if self.flipX:
@@ -123,8 +116,6 @@ class PixelSprite(Layer):
         for i, l in enumerate(lines):
             sys.stdout.write(l)
             sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
-            # sys.stdout.write(f"\033[{self.pos.y + i};{self.pos.x}H")
-        # sys.stdout.write("\033[10;10H")
         sys.stdout.flush()
         print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
