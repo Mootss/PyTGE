@@ -67,8 +67,8 @@ class PixelSprite(Layer):
         self.flipX = False
         self.flipY = False
 
-    def render_char(self, x, y, frame): # draws 1 character (which is 2 px)
-        # frame = self.render_pixels()
+    def render_char(self, x, y): # draws 1 character (which is 2 px)
+        frame = self.rendered_frame
         fg = frame[y*2][x]
         bg = frame[y*2+1][x]
         if self.screen.colorMode == 8:
@@ -78,11 +78,11 @@ class PixelSprite(Layer):
         else:
             raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
 
-    def render_pixels(self): # convert array to ansi & print it
+    def render_frame(self): # convert array to ansi & print it
         frame = [list(line) for line in self.get_frame()]
         for child in self.children:
             if child.frames:
-                child_frame = child.render_pixels()
+                child_frame = child.render_frame()
                 # print(child_frame)
                 for x, y in itertools.product(range(child.size.x), range(child.size.y)):
                     x1 = x + child.pos.x
@@ -100,14 +100,15 @@ class PixelSprite(Layer):
         return frame
 
     def draw(self): # convert array to ansi & print it
-        frame = self.render_pixels()
+        self.rendered_frame = self.render_frame()
         lines = []
 
-        for y in range(len(frame) // 2):
+        ## pixels
+        for y in range(len(self.rendered_frame) // 2):
             chars = ""
-            for x in range(len(frame[y])):
+            for x in range(len(self.rendered_frame[y])):
                 # print(x, y)
-                chars += self.render_char(x, y, frame)
+                chars += self.render_char(x, y)
             lines.append(chars)
         # sys.stdout.write("\033[2J")
         sys.stdout.write("\033[H")
@@ -117,24 +118,61 @@ class PixelSprite(Layer):
             sys.stdout.write(l)
             sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
         sys.stdout.flush()
-        print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
+        # print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
 class TextSprite(Layer):
 
     def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
         super().__init__(pos, size, collision_box, children)
 
-    def draw(self, parent):
+    def draw(self):
         pass
 
 class TextBox(Layer):
 
     def __init__(self, pos, size, collision_box, children, text):
-        super().__init__(pos, size, collision_box, children)
+        super().__init__(pos, size, collision_box, children, None)
         self.text = text
 
-    def draw(self, parent):
-        pass
+    def render_text(self):
+        frame = self.text[:]
+        for _ in range(len(frame), self.size.y):
+            frame.append(" " * self.size.x)
+        for i, line in enumerate(frame):
+            if len(line) < self.size.x:
+                frame[i] += " " * (self.size.x - len(line))
+        for child in self.children:
+            if child.text:
+                child_text = child.render_text()
+                for x, y in itertools.product(range(child.size.x), range(child.size.y)):
+                    x1 = x + child.pos.x
+                    y1 = y + child.pos.y
+                    char = child_text[y][x]
+                    if 0 <= y1 < self.size.y \
+                    and 0 <= x1 < self.size.x:
+                        frame[y1][x1] = char
+        return frame
+
+    def draw(self):
+        self.rendered_text = self.render_text()
+        lines = self.rendered_text
+
+        ## pixels
+        # for y in range(len(self.rendered_text) // 2):
+        #     chars = ""
+        #     for x in range(len(self.rendered_text[y])):
+        #         # print(x, y)
+        #         chars += self.render_char(x, y)
+        #     lines.append(chars)
+        # sys.stdout.write("\033[2J")
+        sys.stdout.write("\033[H")
+        sys.stdout.write(f"\033[{self.pos.y};{self.pos.x}H")
+        width = len(lines[0])
+        for i, l in enumerate(lines):
+            sys.stdout.write(l)
+            sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
+        sys.stdout.flush()
+        # print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
 class FillBox(PixelSprite):
 

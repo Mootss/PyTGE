@@ -38,7 +38,7 @@ def ready(game):
     print("\033[2J\33[?25l") # clear screen + hide cursor
     game.prevTime = time.time()
     game.FPS = 1
-    game.move = "You haven't moved yet! use arrow keys to move!"
+    game.move = "Use arrow keys to move!"
 
     class Mario(PixelSprite):
 
@@ -53,6 +53,8 @@ def ready(game):
         Mario()
     ], color=59)
     game.box.screen = screen
+    game.textbox = TextBox((66, 7), (29, 5), None, [], text=["123","45678","90"]) 
+    game.textbox.screen = screen
 
 def process(game):
     mario = game.box.children[-1]
@@ -84,7 +86,11 @@ def process(game):
         
     
     # draw to console
+    game.textbox.draw()
     game.box.draw()
+    # time.sleep(1/60)
+    # print(f"\033[94;1H\033[0J", end="")
+    # print(f"\033[1J", end="")
     
     # --------------- I RECOMMEND PUTTING ALL PRINT STATEMENTS AFTER OUTPUTING LAYERS ---------------------------
 
@@ -97,10 +103,12 @@ def process(game):
         currentFPS = 1 / dt
         game.FPS = 0.9 * game.FPS + 0.1 * currentFPS
 
-    print(f"FPS: {game.FPS:.2f}")
-    print(f"X: {mario.pos.x} Y: {mario.pos.y}")
-    print(f"move: {game.move}")
-    print("click 'q' to quit")
+    game.textbox.text = [
+        f"FPS: {game.FPS:.2f}",
+        f"X: {mario.pos.x} Y: {mario.pos.y}",
+        f"move: {game.move}",
+        "click 'q' to quit",
+    ]
 
 game = Game(ready, process)
 game.start()
