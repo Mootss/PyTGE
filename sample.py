@@ -33,13 +33,16 @@ def ready(game):
     game.move = "You haven't moved yet! use arrow keys to move!"
 
     game.box = FillBox(Point(0,0), Point(64,32), None, [
-        # FillBox(Point(1,3), Point(4,3), None, [], color=2)
+        FillBox(Point(0,0), Point(10,10), None, [], color=1),
+        FillBox(Point(5,5), Point(10,10), None, [
+            FillBox(Point(2,0), Point(5,5), None, [], color=3),
+        ], color=2),
         PixelSprite(Point(0,0), Point(len(mario[0]), len(mario)), None, [], (mario,)) 
     ], color=59)
     game.box.screen = screen
 
 def process(game):
-    mario = game.box.children[0]
+    mario = game.box.children[-1]
     # handle input
     key = getKey() # getKey returns a key u click
     if key:

@@ -1,5 +1,6 @@
 import sys
 import os
+import itertools
 
 class Screen():
     #bit3 = "\033"
@@ -83,8 +84,8 @@ class PixelSprite(Layer):
         self.flipX = False
         self.flipY = False
 
-    def render_char(self, x, y): # draws 1 character (which is 2 px)
-        frame = self.render_pixels()
+    def render_char(self, x, y, frame): # draws 1 character (which is 2 px)
+        # frame = self.render_pixels()
         fg = frame[max(0, y*2)][x]
         bg = frame[max(0, y*2+1)][x]
         if self.screen.colorMode == 8:
@@ -100,13 +101,15 @@ class PixelSprite(Layer):
             if child.frames:
                 child_frame = child.render_pixels()
                 # print(child_frame)
-                for relative_y, absolute_y in enumerate(range(child.pos.y, child.pos.y+child.size.y)):
-                    if absolute_y <= (len(frame) - 1):
-                        for relative_x, absolute_x in enumerate(range(child.pos.x, child.pos.x+child.size.x)):
-                            if absolute_x <= (len(frame[absolute_y]) - 1):
-                                # print(x, y)
-                                # print(len(frame[y]))
-                                frame[absolute_y][absolute_x] = child_frame[relative_y][relative_x]
+                for x, y in itertools.product(range(child.size.x), range(child.size.y)):
+                    frame[y + child.pos.y][x + child.pos.x] = child_frame[y][x]
+                # for relative_y, absolute_y in enumerate(range(child.pos.y, child.pos.y+child.size.y)):
+                #     if absolute_y <= (len(frame) - 1):
+                #         for relative_x, absolute_x in enumerate(range(child.pos.x, child.pos.x+child.size.x)):
+                #             if absolute_x <= (len(frame[absolute_y]) - 1):
+                #                 # print(x, y)
+                #                 # print(len(frame[y]))
+                #                 frame[absolute_y][absolute_x] = child_frame[relative_y][relative_x]
         if self.flipX:
             frame.reverse()
         if self.flipY:
@@ -122,7 +125,7 @@ class PixelSprite(Layer):
             chars = ""
             for x in range(len(frame[y])):
                 # print(x, y)
-                chars += self.render_char(x, y)
+                chars += self.render_char(x, y, frame)
             lines.append(chars)
         # sys.stdout.write("\033[2J")
         sys.stdout.write("\033[H")
