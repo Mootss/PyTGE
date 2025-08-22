@@ -138,6 +138,7 @@ class TextBox(Layer):
         frame = self.text[:]
         for _ in range(len(frame), self.size.y):
             frame.append(" " * self.size.x)
+        frame = frame[:self.size.y]
         for i, line in enumerate(frame):
             if len(line) < self.size.x:
                 frame[i] += " " * (self.size.x - len(line))
