@@ -32,12 +32,17 @@ def ready(game):
     game.FPS = 1
     game.move = "You haven't moved yet! use arrow keys to move!"
 
+    class Mario(PixelSprite):
+
+        def __init__(self):
+            super().__init__(Point(0,0), Point(len(mario[0]), len(mario)), None, [], (mario,))
+
     game.box = FillBox(Point(0,0), Point(64,32), None, [
         FillBox(Point(0,0), Point(10,10), None, [], color=1),
         FillBox(Point(5,5), Point(10,10), None, [
             FillBox(Point(2,0), Point(5,5), None, [], color=3),
         ], color=2),
-        PixelSprite(Point(0,0), Point(len(mario[0]), len(mario)), None, [], (mario,)) 
+        Mario()
     ], color=59)
     game.box.screen = screen
 
