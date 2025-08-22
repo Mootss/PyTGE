@@ -3,9 +3,6 @@ import os
 import itertools
 
 class Screen():
-    #bit3 = "\033"
-    #bit8 = "\033[38;5;0m"
-
     def __init__(self, colorMode, height, width, color=0):
         self.colorMode = colorMode
         # colorMode should be 8 or 256. thats the number of colors to be used
@@ -13,20 +10,6 @@ class Screen():
         self.height = height
         self.width = width
         self.color = color # if undefined, default = black
-        # self.array = createShape(self.color, self.width, self.height)
-        # self.displayArray = [row[:] for row in self.array]
-        # sprite eh draw kuran v ma do it by modifying display array instead of og array, so og array can be re-used when a sprite is moved
-        # im sure theres a more efficient way to do ts but my sikundi too smol
-
-    # def reset(self):
-    #     #self.displayArray = [[e for e in row] for row in self.array]
-    #     self.displayArray = [row[:] for row in self.array]
-
-    # def drawSprite(self, sprite):
-    #     for row in range(len(sprite.array)):
-    #         for e in range(len(sprite.array[row])):
-    #             if sprite.array[row][e] != -1:
-    #                 self.displayArray[sprite.posY + row][sprite.posX + e] = sprite.array[row][e]
 
 class Point():
     def __init__(self, x, y):
@@ -89,7 +72,7 @@ class PixelSprite(Layer):
         fg = frame[y*2][x]
         bg = frame[y*2+1][x]
         if self.screen.colorMode == 8:
-            return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m" # \033[0m actually only needs to be written at the end of each line but wtver
+            return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m"
         elif self.screen.colorMode == 256:
             return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\033[0m"
         else:
@@ -143,7 +126,7 @@ class PixelSprite(Layer):
             # sys.stdout.write(f"\033[{self.pos.y + i};{self.pos.x}H")
         # sys.stdout.write("\033[10;10H")
         sys.stdout.flush()
-        # print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
+        print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
 class TextSprite(Layer):
 
@@ -187,23 +170,8 @@ class InputHandler():
     #not sure how to write ts
     pass
 
-
-
-# square1 = [[1, 1, 3, 1, 1],
-#            [1,-1,-1,-1, 1],
-#            [3,-1,-1,-1, 3],
-#            [1,-1,-1,-1, 1],
-#            [1, 1, 3, 1, 1]]
-
-# square2 = [[4, 4, 6, 4, 4],
-#            [4,-1,-1,-1, 4],
-#            [6,-1,-1,-1, 6],
-#            [4,-1,-1,-1, 4],
-#            [4, 4, 6, 4, 4]]
-
-
-
 # input handling, stole this from stackoverflow heh
+# arrow keys = H P M K (windows), A B C D (unix)
 if os.name == 'nt':  # Windows
     import msvcrt
 

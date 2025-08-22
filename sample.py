@@ -6,9 +6,7 @@ screen = Screen(
     colorMode=256,
     height=32,
     width=64,
-    # heigth and width must be an even number
-    color=1 #59
-    # in 8 colorMode to set red u will write color=1, bec 1 is red, bec 41 and 31 is red. in 8 colormode only use the last digit 
+    color=1 
 )
 
 mario = [[255,255,255,203,203,203,203,203,203,255,255,255],[255,255,203,203,203,203,203,203,203,203,203,203],[255,255,94,94,94,223,223,223,0,223,255,255],[255,94,223,94,223,223,223,223,0,223,223,255],[255,94,223,94,94,223,223,223,223,0,223,223],[255,94,94,223,223,223,223,223,0,0,0,0],[255,255,255,223,223,223,223,223,223,223,223,255],[255,255,203,203,31,203,203,203,203,255,255,255],[255,203,203,203,31,203,203,31,203,203,203,255],[203,203,203,203,31,31,31,31,203,203,203,203],[223,223,203,31,11,31,31,11,31,203,223,223],[223,223,223,31,31,31,31,31,31,223,223,223],[223,223,31,31,31,31,31,31,31,31,223,223],[255,255,31,31,31,31,31,31,31,31,255,255],[255,94,94,94,255,255,255,255,94,94,94,255],[94,94,94,94,255,255,255,255,94,94,94,94]]
@@ -18,13 +16,6 @@ mario = [[255,255,255,203,203,203,203,203,203,255,255,255],[255,255,203,203,203,
 #     for z, w in enumerate(y):
 #         if w == 255:
 #             pictureOfMarioInArrayFormatBruh[x][z] = -1
-
-# create the MARIO!
-# mario = Sprite(
-#     array= pictureOfMarioInArrayFormatBruh,
-#     posX=5,
-#     posY=5
-# )
 
 def ready(game):
     print("\033[2J\33[?25l") # clear screen + hide cursor
@@ -70,14 +61,12 @@ def process(game):
             mario.move("left", 1)
             game.move = "left"
 
-        # H P M K is for windows, A B C D is for unix
+        
     
-    # draw the shits
+    # draw to console
     game.box.draw()
-    # screen.drawSprite(mario) # this inserts the sprite into the screen array but doesnt actually print to terminal
-    # screen.render() # this prints the "pixel screen"
     
-    # --------------- I RECOMMEND PUTTING ALL PRINT STATEMENTS AFTER screen.render() ---------------------------
+    # --------------- I RECOMMEND PUTTING ALL PRINT STATEMENTS AFTER OUTPUTING LAYERS ---------------------------
 
     # debugging stuff
     #time.sleep(0.05) # control framerate
@@ -92,7 +81,6 @@ def process(game):
     print(f"X: {mario.pos.x} Y: {mario.pos.y}")
     print(f"move: {game.move}")
     print("click 'q' to quit")
-    game.FPS+=1
 
 # print("\033[2J\033[?25l")
 # time.sleep(0.3)
