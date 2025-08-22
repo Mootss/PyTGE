@@ -165,9 +165,12 @@ class TextBox(Layer):
 class FillBox(PixelSprite):
 
     def __init__(self, pos, size, collision_box, children, color):
-        frames = (tuple(tuple(color for x in range(size.x)) for y in range(size.y)),)
-        super().__init__(pos, size, collision_box, children, frames)
+        super().__init__(pos, size, collision_box, children, None)
+        self.set_color(color)
+
+    def set_color(self, color):
         self.color = color
+        self.frames = (tuple(tuple(color for x in range(self.size.x)) for y in range(self.size.y)),)
 
 class Game():
 
