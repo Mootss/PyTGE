@@ -54,10 +54,13 @@ def process(game):
             game.move = "down"
 
         elif key in ["M", "C"]: # right
+            mario.flipX = False
             mario.move("right", 1)
             game.move = "right"
 
         elif key in ["K", "D"]: # left
+            
+            mario.flipX = True
             mario.move("left", 1)
             game.move = "left"
 

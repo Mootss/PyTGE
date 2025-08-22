@@ -99,9 +99,9 @@ class PixelSprite(Layer):
                 #                 # print(x, y)
                 #                 # print(len(frame[y]))
                 #                 frame[absolute_y][absolute_x] = child_frame[relative_y][relative_x]
-        if self.flipX:
-            frame.reverse()
         if self.flipY:
+            frame.reverse()
+        if self.flipX:
             for line in frame:
                 line.reverse()
         return frame
