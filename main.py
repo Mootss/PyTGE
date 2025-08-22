@@ -42,8 +42,8 @@ class Box():
 class Layer():
 
     def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
-        self.pos = pos
-        self.size = size
+        self.pos = Point(*pos)
+        self.size = Point(*size)
         if collision_box:
             self.collision_box = collision_box
         self.children = [] or children

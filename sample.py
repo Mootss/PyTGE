@@ -35,12 +35,12 @@ def ready(game):
     class Mario(PixelSprite):
 
         def __init__(self):
-            super().__init__(Point(0,0), Point(len(mario[0]), len(mario)), None, [], (mario,))
+            super().__init__((0,0), (len(mario[0]), len(mario)), None, [], (mario,))
 
-    game.box = FillBox(Point(0,0), Point(64,32), None, [
-        FillBox(Point(0,0), Point(10,10), None, [], color=1),
-        FillBox(Point(5,5), Point(10,10), None, [
-            FillBox(Point(2,0), Point(5,5), None, [], color=3),
+    game.box = FillBox((0,0), (64,32), None, [
+        FillBox((0,0), (10,10), None, [], color=1),
+        FillBox((5,5), (10,10), None, [
+            FillBox((2,0), (5,5), None, [], color=3),
         ], color=2),
         Mario()
     ], color=59)
