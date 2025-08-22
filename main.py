@@ -86,8 +86,8 @@ class PixelSprite(Layer):
 
     def render_char(self, x, y, frame): # draws 1 character (which is 2 px)
         # frame = self.render_pixels()
-        fg = frame[max(0, y*2)][x]
-        bg = frame[max(0, y*2+1)][x]
+        fg = frame[y*2][x]
+        bg = frame[y*2+1][x]
         if self.screen.colorMode == 8:
             return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m" # \033[0m actually only needs to be written at the end of each line but wtver
         elif self.screen.colorMode == 256:
