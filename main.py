@@ -104,9 +104,11 @@ class PixelSprite(Layer):
                 for x, y in itertools.product(range(child.size.x), range(child.size.y)):
                     x1 = x + child.pos.x
                     y1 = y + child.pos.y
+                    pixel = child_frame[y][x]
                     if 0 <= y1 < self.size.y \
-                    and 0 <= x1 < self.size.x:
-                        frame[y1][x1] = child_frame[y][x]
+                    and 0 <= x1 < self.size.x \
+                    and pixel != -1:
+                        frame[y1][x1] = pixel
                 # for relative_y, absolute_y in enumerate(range(child.pos.y, child.pos.y+child.size.y)):
                 #     if absolute_y <= (len(frame) - 1):
                 #         for relative_x, absolute_x in enumerate(range(child.pos.x, child.pos.x+child.size.x)):
