@@ -1,0 +1,11 @@
+{
+  "background": [],
+  "sprites": [],
+  "audio": {
+    "sfx": {
+      "sound1": "boom",
+      "sound2": "bam"
+    },
+    "theme-music": ""
+  }
+}
