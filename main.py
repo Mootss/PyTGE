@@ -1,6 +1,10 @@
 import sys
 import os
 import itertools
+import json
+import winsound 
+import base64
+import tempfile
 
 class Screen():
     def __init__(self, colorMode, height, width, color=0):
@@ -183,6 +187,40 @@ class FillBox(PixelSprite):
     def set_color(self, color):
         self.color = color
         self.frames = (tuple(tuple(color for x in range(self.size.x)) for y in range(self.size.y)),)
+
+
+class Audio():
+    def __init__(self, db):
+        self.soundPaths = {}
+        for k, v in ({**db["sounds"]["music"], **db["sounds"]["sfx"]}).items():
+            if v:
+                decoded = base64.b64decode(v)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
+                    temp.write(decoded)
+                    self.soundPaths[k] = temp.name
+
+    def playSound(self, sound, loop=False):
+        if sound in self.soundPaths:
+            if not loop:
+                winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC)
+                # timer = threading.Timer(duration, lambda: winsound.PlaySound(None, winsound.SND_PURGE))
+                # timer.start()
+
+            else:
+                winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
+        else:
+            raise ValueError(f"Provided sound '{sound}' does not exist")
+        
+    def stopSound(self):
+        winsound.PlaySound(None, winsound.SND_PURGE)
+        
+    def cleanup(self): # important! must run this when exiting to delete all temp files created during runtime
+        for path in self.soundPaths:
+            try:
+                os.remove(self.soundPaths[path])
+            except FileNotFoundError:
+                pass  
+
 
 class Game():
 
