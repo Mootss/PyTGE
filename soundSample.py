@@ -26,11 +26,11 @@ def ready(game):
     game.FPS = 1
     game.move = "Use arrow keys to move!"
 
-    bg = PixelSprite((0,0), (bg1,))
+    bg = PixelSprite((0,0), frames=(bg1,))
 
     game.box = bg
     game.box.screen = screen
-    game.textbox = TextBox((66, 7), (29, 5), None, [], text=["123","45678","90"]) 
+    game.textbox = TextBox((66, 7), (50, 30), None, [], text=["123","45678","90"]) 
     game.textbox.screen = screen
 
 def process(game):
@@ -79,5 +79,3 @@ def process(game):
 
 game = Game(ready, process)
 game.start()
-
-#https://www.geeksforgeeks.org/python/play-sound-in-python/
