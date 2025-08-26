@@ -41,23 +41,33 @@ def ready(game):
     game.move = "Use arrow keys to move!"
 
     class Mario(PixelSprite):
+        def __init__(self, hp=3):
+            super().__init__((0,0), frames=(mario,))
+            self.hp = hp # sprites can have their own properties
+    
+    redSquare = FillBox((0,0), (10,10), color=1)
+    yellowSquare = FillBox((2,0), (5,5), color=3)
+    greenSquare = FillBox((5,5), (10,10), color=2)
+    game.mario = Mario()
+    camera = FillBox((0,0), (64,32), color=59)
 
-        def __init__(self):
-            super().__init__((0,0), (len(mario[0]), len(mario)), None, [], (mario,))
+    greenSquare.children = [
+        yellowSquare
+    ]
 
-    game.box = FillBox((0,0), (64,32), None, [
-        FillBox((0,0), (10,10), None, [], color=1),
-        FillBox((5,5), (10,10), None, [
-            FillBox((2,0), (5,5), None, [], color=3),
-        ], color=2),
-        Mario()
-    ], color=59)
+    camera.children = [
+        redSquare,
+        greenSquare,
+        game.mario
+    ]
+
+    game.box = camera
     game.box.screen = screen
     game.textbox = TextBox((66, 7), (26, 5), None, [], text=["123","45678","90"]) 
     game.textbox.screen = screen
 
 def process(game):
-    mario = game.box.children[-1]
+    mario = game.mario
     # handle input
     key = getKey() # getKey returns a key u click
     if key:

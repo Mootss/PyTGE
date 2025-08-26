@@ -36,7 +36,17 @@ class Layer():
 
     def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
         self.pos = Point(*pos)
-        self.size = Point(*size)
+        if (size == None) and frames:
+            if (not frames[0]) or (len(frames[0]) <= 0):
+                raise ValueError("Sprite frames empty!")
+            height = len(frames[0])
+            width = len(frames[0][0])
+            self.size = Point(width, height)
+        elif (size == None) and (frames == None):
+                raise ValueError("Size must be provided when no frames are given!")
+        else:
+            self.size = Point(*size)
+
         if collision_box:
             self.collision_box = collision_box
         self.children = [] or children
@@ -70,7 +80,7 @@ class Layer():
 
 class PixelSprite(Layer):
 
-    def __init__(self, pos, size, collision_box, children, frames, frame_id=0):
+    def __init__(self, pos, size=None, collision_box=None, children=[], frames=None, frame_id=0):
         super().__init__(pos, size, collision_box, children, frames, frame_id)
 
         self.uhb = "\u2580" # upper half block ▀
@@ -187,7 +197,7 @@ class TextBox(Layer):
 
 class FillBox(PixelSprite):
 
-    def __init__(self, pos, size, collision_box, children, color):
+    def __init__(self, pos, size, collision_box=None, children=[], color=0):
         super().__init__(pos, size, collision_box, children, None)
         self.set_color(color)
 
