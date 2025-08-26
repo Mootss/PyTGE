@@ -1,6 +1,16 @@
 import sys
 import os
 import itertools
+import json
+import base64
+import tempfile
+
+OS = sys.platform
+if OS == "win32":
+    import winsound
+else:
+    pass
+    # TODO: make everything unix compatible
 
 class Screen():
     def __init__(self, colorMode, height, width, color=0):
@@ -184,6 +194,38 @@ class FillBox(PixelSprite):
     def set_color(self, color):
         self.color = color
         self.frames = (tuple(tuple(color for x in range(self.size.x)) for y in range(self.size.y)),)
+
+# add a os check
+class Audio():
+    def __init__(self, sounds):
+        # 'sounds' takes a dict containing all the audio in base64 format
+        self.soundPaths = {}
+        for k, v in sounds.items():
+            if v:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
+                    temp.write(base64.b64decode(v))
+                    self.soundPaths[k] = temp.name
+
+    def play(self, sound, loop=False):
+        if sound in self.soundPaths:
+            if not loop:
+                winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC)
+            else:
+                winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
+        else:
+            raise ValueError(f"Provided sound '{sound}' does not exist")
+        
+    def stop(self):
+        winsound.PlaySound(None, winsound.SND_PURGE)
+        
+    def cleanup(self): # should run this when exiting to delete all temp files created during runtime
+        self.stop()
+        for path in self.soundPaths:
+            try:
+                os.remove(self.soundPaths[path])
+            except FileNotFoundError:
+                pass  
+
 
 class Game():
 
