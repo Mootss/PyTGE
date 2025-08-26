@@ -2,9 +2,15 @@ import sys
 import os
 import itertools
 import json
-import winsound 
 import base64
 import tempfile
+
+OS = sys.platform
+if OS == "win32":
+    import winsound
+else:
+    pass
+    # TODO: make everything unix compatible
 
 class Screen():
     def __init__(self, colorMode, height, width, color=0):
@@ -188,33 +194,31 @@ class FillBox(PixelSprite):
         self.color = color
         self.frames = (tuple(tuple(color for x in range(self.size.x)) for y in range(self.size.y)),)
 
-
+# add a os check
 class Audio():
-    def __init__(self, db):
+    def __init__(self, sounds):
+        # 'sounds' takes a dict containing all the audio in base64 format
         self.soundPaths = {}
-        for k, v in ({**db["sounds"]["music"], **db["sounds"]["sfx"]}).items():
+        for k, v in sounds.items():
             if v:
-                decoded = base64.b64decode(v)
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
-                    temp.write(decoded)
+                    temp.write(base64.b64decode(v))
                     self.soundPaths[k] = temp.name
 
-    def playSound(self, sound, loop=False):
+    def play(self, sound, loop=False):
         if sound in self.soundPaths:
             if not loop:
                 winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC)
-                # timer = threading.Timer(duration, lambda: winsound.PlaySound(None, winsound.SND_PURGE))
-                # timer.start()
-
             else:
                 winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
         else:
             raise ValueError(f"Provided sound '{sound}' does not exist")
         
-    def stopSound(self):
+    def stop(self):
         winsound.PlaySound(None, winsound.SND_PURGE)
         
-    def cleanup(self): # important! must run this when exiting to delete all temp files created during runtime
+    def cleanup(self): # should run this when exiting to delete all temp files created during runtime
+        self.stop()
         for path in self.soundPaths:
             try:
                 os.remove(self.soundPaths[path])

@@ -1,12 +1,6 @@
 from main import *
 import time
 
-with open("db.json", "r") as f:
-    db = json.load(f)
-
-sound = Audio(db) # this loads the audio data from db.json and creates .wav temp files
-# up exit cleanup() should be used to delete all temp files, this is not necessary but should be used to avoid cluttering
-# TODO: make cleanup() work when keyboard interupt
 
 # set up the screen here
 screen = Screen(
@@ -20,13 +14,19 @@ bg1 = [[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
 
 
 def ready(game):
+        
+    with open("db.json", "r") as f:
+        db = json.load(f)
+    game.sound = Audio(
+        sounds= {**db["sounds"]["music"], **db["sounds"]["sfx"]}
+    )
+    
     print("\033[2J\33[?25l") # clear screen + hide cursor
     game.prevTime = time.time()
     game.FPS = 1
     game.move = "Use arrow keys to move!"
 
-
-    bg = PixelSprite((0,0), (len(bg1[0]), len(bg1)), None, [], (bg1,))
+    bg = PixelSprite((0,0), (bg1,))
 
     game.box = bg
     game.box.screen = screen
@@ -38,17 +38,20 @@ def process(game):
     key = getKey() # getKey returns a key u click
     if key:
         if key.lower() == "q":
-            sound.cleanup()
+            game.sound.cleanup() # upon exit, cleanup() should be used to delete all temp files, this is not necessary but should be used to avoid cluttering
             return True
 
         elif key in ["1"]:
-            sound.playSound("game-over")
+            game.sound.play("theme-music", loop=True)
 
         elif key in ["2"]:
-            sound.playSound("game-over")
+            game.sound.play("game-over")
+            
+        elif key in ["3"]:
+            game.sound.play("mario-die")
             
         elif key in ["x"]:
-            sound.stopSound()
+            game.sound.stop()
     
     # draw to console
     game.textbox.draw()
@@ -69,9 +72,12 @@ def process(game):
         "Click a number to play a sound. Click 'x' to stop playing a sound.",
         "1- Theme song",
         "2- Gameover",
+        "3- Mario die",
         "-------------------------",
         "click 'q' to quit",
     ]
 
 game = Game(ready, process)
 game.start()
+
+#https://www.geeksforgeeks.org/python/play-sound-in-python/
