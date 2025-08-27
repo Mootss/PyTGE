@@ -39,6 +39,7 @@ def ready(game):
     game.prevTime = time.time()
     game.FPS = 1
     game.move = "Use arrow keys to move!"
+    game.input = InputHandler(["esc", "q", "upArrow", "downArrow", "rightArrow", "leftArrow"]) # add keys to track
 
     class Mario(PixelSprite):
         def __init__(self, hp=3):
@@ -68,32 +69,31 @@ def ready(game):
 
 def process(game):
     mario = game.mario
+
     # handle input
-    key = getKey() # getKey returns a key u click
-    if key:
-        if key.lower() == "q":
-            return True
+    game.input.updateKeyStates()
+    keyDown = game.input.keyDown
+    if keyDown(["q", "esc"]): # check multiple
+        return True
 
-        elif key in ["H", "A"]: # up
-            mario.move("up", 1)
-            game.move = "up"
+    elif keyDown("upArrow"): # check one
+        mario.move("up", 1)
+        game.move = "up"
 
-        elif key in ["P", "B"]: # down
-            mario.move("down", 1)
-            game.move = "down"
+    elif keyDown("downArrow"):
+        mario.move("down", 1)
+        game.move = "down"
 
-        elif key in ["M", "C"]: # right
-            mario.flipX = False
-            mario.move("right", 1)
-            game.move = "right"
+    elif keyDown("rightArrow"): 
+        mario.flipX = False
+        mario.move("right", 1)
+        game.move = "right"
 
-        elif key in ["K", "D"]: # left
-            
-            mario.flipX = True
-            mario.move("left", 1)
-            game.move = "left"
-
+    elif keyDown("leftArrow"): 
         
+        mario.flipX = True
+        mario.move("left", 1)
+        game.move = "left"
     
     # draw to console
     game.textbox.draw()
@@ -105,7 +105,7 @@ def process(game):
     # --------------- I RECOMMEND PUTTING ALL PRINT STATEMENTS AFTER OUTPUTING LAYERS ---------------------------
 
     # debugging stuff
-    #time.sleep(0.05) # control framerate
+    time.sleep(0.0015) # control framerate
     now = time.time()
     dt = now - game.prevTime
     game.prevTime = now
