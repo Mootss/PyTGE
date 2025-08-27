@@ -4,6 +4,7 @@ import itertools
 import json
 import base64
 import tempfile
+import ctypes
 
 OS = sys.platform
 if OS == "win32":
@@ -249,44 +250,126 @@ class Game():
             pass
 
 class InputHandler():
-    #not sure how to write ts
-    pass
+
+    virtualKeyCodeMap = {
+        "leftmousebutton": 0x01,
+        "rightmousebutton": 0x02,
+        "backspace": 0x08,
+        "tab": 0x09,
+        "enter": 0x0D,
+        "shift": 0x10,
+        "ctrl": 0x11,
+        "alt": 0x12,
+        "capslock": 0x14,
+        "esc": 0x1B,
+        "spacebar": 0x20,
+        "uparrow": 0x26,
+        "downarrow": 0x28,
+        "rightarrow": 0x27,
+        "leftarrow": 0x25,
+        "0": 0x30,
+        "1": 0x31,
+        "2": 0x32,
+        "3": 0x33,
+        "4": 0x34,
+        "5": 0x35,
+        "6": 0x36,
+        "7": 0x37,
+        "8": 0x38,
+        "9": 0x39,
+        "a": 0x41,  
+        "b": 0x42,  
+        "c": 0x43,  
+        "d": 0x44,  
+        "e": 0x45,  
+        "f": 0x46,    
+        "g": 0x47,  
+        "h": 0x48,  
+        "i": 0x49,  
+        "j": 0x4A,
+        "k": 0x4B,
+        "l": 0x4C,
+        "m": 0x4D,
+        "n": 0x4E,
+        "o": 0x4F,
+        "p": 0x50,
+        "q": 0x51,
+        "r": 0x52,
+        "s": 0x53,
+        "t": 0x54,
+        "u": 0x55,
+        "v": 0x56,
+        "w": 0x57,
+        "x": 0x58,
+        "y": 0x59,
+        "z": 0x5A,
+        "+": 0x68,
+        "-": 0x6D
+    }
+
+    def __init__(self, inputKeys):
+
+        for key in inputKeys:
+            if key.lower() not in self.virtualKeyCodeMap:
+                raise ValueError(f"Key '{key}' was not found, pleaes check spelling and / or if given keys exists in virtualKeyCodeMap")
+        #self.inputKeys = list(map(self.virtualKeyCodeMap.get, inputKeys))
+        self.keyStates = {str(key).lower(): False for key in inputKeys}
+        self.getAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
+
+    def updateKeyStates(self):
+        for k in self.keyStates:
+            if self.getAsyncKeyState(self.virtualKeyCodeMap[k]) > 0:
+                self.keyStates[k] = True
+            else: self.keyStates[k] = False 
+
+    def keyDown(self, keys):
+        if isinstance(keys, str):   
+            keys = [keys]
+        if not keys:
+            raise ValueError("keyDown keys list is empty")
+        keys = [k.lower() for k in keys]
+        for k in keys:
+            if k not in self.keyStates:
+                raise ValueError(f"Given key '{k}' is not registered as an inputKey in the InputHandler")
+            if self.keyStates[k]:
+                return True
+        
 
 # input handling, stole this from stackoverflow heh
 # arrow keys = H P M K (windows), A B C D (unix)
-if os.name == 'nt':  # Windows
-    import msvcrt
+# if os.name == 'nt':  # Windows
+#     import msvcrt
 
-    def getKey():
-        if msvcrt.kbhit():  # Only read if a key was pressed
-            first = msvcrt.getch()
-            if first in {b'\x00', b'\xe0'}:  # Special key (arrows, etc.)
-                second = msvcrt.getch()
-                return second.decode('utf-8', errors='ignore')
-            else:
-                return first.decode('utf-8', errors='ignore')
-        return None  # No key pressed
+#     def getKey():
+#         if msvcrt.kbhit():  # Only read if a key was pressed
+#             first = msvcrt.getch()
+#             if first in {b'\x00', b'\xe0'}:  # Special key (arrows, etc.)
+#                 second = msvcrt.getch()
+#                 return second.decode('utf-8', errors='ignore')
+#             else:
+#                 return first.decode('utf-8', errors='ignore')
+#         return None  # No key pressed
 
-else:  # Unix (Linux, macOS)
-    import tty
-    import termios
-    import select
+# else:  # Unix (Linux, macOS)
+#     import tty
+#     import termios
+#     import select
 
-    def getKey():
-        dr, _, _ = select.select([sys.stdin], [], [], 0)  # 0 = no wait
-        if dr:
-            fd = sys.stdin.fileno()
-            old_settings = termios.tcgetattr(fd)
-            try:
-                tty.setraw(fd)
-                ch1 = sys.stdin.read(1)
-                if ch1 == '\x1b':  # Arrow keys
-                    ch2 = sys.stdin.read(1)
-                    ch3 = sys.stdin.read(1)
-                    if ch2 == '[':
-                        return ch3  # 'A'=up, 'B'=down, 'C'=right, 'D'=left
-                return ch1
-            finally:
-                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return None  # No key pressed
+#     def getKey():
+#         dr, _, _ = select.select([sys.stdin], [], [], 0)  # 0 = no wait
+#         if dr:
+#             fd = sys.stdin.fileno()
+#             old_settings = termios.tcgetattr(fd)
+#             try:
+#                 tty.setraw(fd)
+#                 ch1 = sys.stdin.read(1)
+#                 if ch1 == '\x1b':  # Arrow keys
+#                     ch2 = sys.stdin.read(1)
+#                     ch3 = sys.stdin.read(1)
+#                     if ch2 == '[':
+#                         return ch3  # 'A'=up, 'B'=down, 'C'=right, 'D'=left
+#                 return ch1
+#             finally:
+#                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+#         return None  # No key pressed
  
