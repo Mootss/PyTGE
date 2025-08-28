@@ -219,10 +219,13 @@ if os.name == 'nt':  # Windows
 
         def play(self, sound, loop=False):
             if sound in self.soundPaths:
-                if not loop:
-                    winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC)
-                else:
-                    winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
+                try: # temporary solution
+                    if not loop:
+                        winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NOSTOP)
+                    else:
+                        winsound.PlaySound(self.soundPaths[sound], winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NOSTOP | winsound.SND_LOOP)
+                except RuntimeError:
+                    pass
             else:
                 raise ValueError(f"Provided sound '{sound}' does not exist")
             
