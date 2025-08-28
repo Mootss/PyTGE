@@ -9,6 +9,7 @@ import ctypes
 OS = sys.platform
 if OS == "win32":
     import winsound
+    import msvcrt
 else:
     pass
     # TODO: make everything unix compatible
@@ -330,6 +331,8 @@ class InputHandler():
         self.getAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
 
     def updateKeyStates(self):
+        if msvcrt.kbhit(): 
+            msvcrt.getch()
         for k in self.keyStates:
             if self.getAsyncKeyState(self.virtualKeyCodeMap[k]) > 0:
                 self.keyStates[k] = True
