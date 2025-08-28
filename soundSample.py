@@ -25,6 +25,7 @@ def ready(game):
     game.prevTime = time.time()
     game.FPS = 1
     game.move = "Use arrow keys to move!"
+    game.input = InputHandler(["esc", "q", "1", "2", "3", "x"])
 
     bg = PixelSprite((0,0), frames=(bg1,))
 
@@ -35,24 +36,25 @@ def ready(game):
 
 def process(game):
     # handle input
-    key = getKey() # getKey returns a key u click
-    if key:
-        if key.lower() == "q":
-            game.sound.cleanup() # upon exit, cleanup() should be used to delete all temp files, this is not necessary but should be used to avoid cluttering
-            return True
+    game.input.updateKeyStates()
+    keyDown = game.input.keyDown
 
-        elif key in ["1"]:
-            game.sound.play("theme-music", loop=True)
+    if keyDown(["esc", "q"]):
+        game.sound.cleanup() # upon exit, cleanup() should be used to delete all temp files, this is not necessary but should be used to avoid cluttering
+        return True
 
-        elif key in ["2"]:
-            game.sound.play("game-over")
-            
-        elif key in ["3"]:
-            game.sound.play("mario-die")
-            
-        elif key in ["x"]:
-            game.sound.stop()
-    
+    elif keyDown("1"):
+        game.sound.play("theme-music", loop=True)
+
+    elif keyDown("2"):
+        game.sound.play("game-over")
+        
+    elif keyDown("3"):
+        game.sound.play("mario-die")
+        
+    elif keyDown("x"):
+        game.sound.stop()
+
     # draw to console
     game.textbox.draw()
     game.box.draw()
