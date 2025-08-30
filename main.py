@@ -41,9 +41,7 @@ class Layer():
         if (size == None) and frames:
             if (not frames[0]) or (len(frames[0]) <= 0):
                 raise ValueError("Sprite frames empty!")
-            height = len(frames[0])
-            width = len(frames[0][0])
-            self.size = Point(width, height)
+            self.size = Point(len(frames[0][0]), len(frames[0]))
         elif (size == None) and (frames == None):
                 raise ValueError("Size must be provided when no frames are given!")
         else:
@@ -208,14 +206,13 @@ class FillBox(PixelSprite):
         self.frames = (tuple(tuple(color for x in range(self.size.x)) for y in range(self.size.y)),)
 
 class TextToSprite(PixelSprite):
-    # TODO: only add charSpace between characters and not words
-    #       add option to change text color
     #       caseSensitive\
     #       add more fonts
-    def __init__(self, pos, text, font, wordSpace=4, charSpace=1):
+    def __init__(self, pos, text, font, color=1, wordSpace=5, charSpace=1):
         # wordSpace = space between words, charSpace = space between characters
         self.text = str(text)
         self.font = font
+        self.color = color
         self.wordSpace = wordSpace
         self.charSpace = charSpace
         print(f"space: {self.wordSpace} - {self.charSpace}")
@@ -224,13 +221,12 @@ class TextToSprite(PixelSprite):
     def renderText(self):
         row = []
         final = []
-        for i in range(len(self.font["A"])):
+        for i in range(len(self.font["a"])):
             for char in self.text:
-                if char == " ": # compact ts
-                    #row.extend([[1 for e in range(self.wordSpace[0])] for e in range(self.wordSpace[1])])
-                    row.extend([-1 for _ in range(self.wordSpace)])
+                if char == " ":
+                    row.extend([-1] * (self.wordSpace - self.charSpace))
                 else:
-                    row.extend(self.font[char][i] + [-1 for _ in range(self.charSpace)])
+                    row.extend([(self.color if pixel != -1 else -1) for pixel in self.font[char][i]] + ([-1] * self.charSpace))
             final.append(row)
             row = []
         return final
@@ -297,7 +293,7 @@ class Fonts():
         "4": [[-1,-1,-1,0,0],[-1,-1,0,-1,0],[-1,0,-1,-1,0],[0,-1,-1,-1,0],[0,0,0,0,0],[-1,-1,-1,-1,0],[-1,-1,-1,-1,0]],
         "5": [[0,0,0,0,0],[0,-1,-1,-1,-1],[0,0,0,0,-1],[-1,-1,-1,-1,0],[-1,-1,-1,-1,0],[0,-1,-1,-1,0],[-1,0,0,0,-1]],
         "6": [[-1,-1,0,0,-1],[-1,0,-1,-1,-1],[0,-1,-1,-1,-1],[0,0,0,0,-1],[0,-1,-1,-1,0],[0,-1,-1,-1,0],[-1,0,0,0,-1]],
-        "-1": [[0,0,0,0,0],[0,-1,-1,-1,0],[-1,-1,-1,-1,0],[-1,-1,-1,0,-1],[-1,-1,0,-1,-1],[-1,-1,0,-1,-1],[-1,-1,0,-1,-1]],
+        "7": [[0,0,0,0,0],[0,-1,-1,-1,0],[-1,-1,-1,-1,0],[-1,-1,-1,0,-1],[-1,-1,0,-1,-1],[-1,-1,0,-1,-1],[-1,-1,0,-1,-1]],
         "8": [[-1,0,0,0,-1],[0,-1,-1,-1,0],[0,-1,-1,-1,0],[-1,0,0,0,-1],[0,-1,-1,-1,0],[0,-1,-1,-1,0],[-1,0,0,0,-1]],
         "9": [[-1,0,0,0,-1],[0,-1,-1,-1,0],[0,-1,-1,-1,0],[-1,0,0,0,0],[-1,-1,-1,-1,0],[-1,-1,-1,0,-1],[-1,0,0,-1,-1]],
         ".": [[-1],[-1],[-1],[-1],[-1],[-1],[0]],
