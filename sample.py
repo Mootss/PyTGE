@@ -36,7 +36,7 @@ mario = [
 
 def ready(game):
     print("\033[2J\33[?25l") # clear screen + hide cursor
-    game.prevTime = time.time()
+    
     game.FPS = 1
     game.move = "Use arrow keys to move!"
     game.input = InputHandler(["esc", "q", "upArrow", "downArrow", "rightArrow", "leftArrow"]) # add keys to track
@@ -44,13 +44,17 @@ def ready(game):
     class Mario(PixelSprite):
         def __init__(self, hp=3):
             super().__init__((0,0), frames=(mario,))
-            self.hp = hp # sprites can have their own properties
+            self.speed = 64
+
+        def move(self, direction, deltaTime):
+            i = round(self.speed * deltaTime)
+            super().move(direction, i)
     
     redSquare = FillBox((0,0), (10,10), color=1)
     yellowSquare = FillBox((2,0), (5,5), color=3)
     greenSquare = FillBox((5,5), (10,10), color=2)
     game.mario = Mario()
-    camera = FillBox((0,0), (64,32), color=59)
+    camera = FillBox((0,0), (92,64), color=59)
 
     greenSquare.children = [
         yellowSquare
@@ -64,10 +68,19 @@ def ready(game):
 
     game.box = camera
     game.box.screen = screen
-    game.textbox = TextBox((66, 7), (26, 5), None, [], text=["123","45678","90"]) 
+    game.textbox = TextBox((94, 7), (26, 5), None, [], text=["123","45678","90"]) 
     game.textbox.screen = screen
+    game.prevTime = time.time()
 
 def process(game):
+    time.sleep(0.01) # control framerate
+    now = time.time()
+    deltaTime = now - game.prevTime
+    game.prevTime = now
+    if deltaTime > 0:
+        currentFPS = 1 / deltaTime
+        game.FPS = 0.9 * game.FPS + 0.1 * currentFPS
+
     mario = game.mario
 
     # handle input
@@ -76,23 +89,23 @@ def process(game):
     if keyDown(["q", "esc"]): # check multiple
         return True
 
-    elif keyDown("upArrow"): # check one
-        mario.move("up", 1)
+    if keyDown("upArrow"): # check one
+        mario.move("up", deltaTime)
         game.move = "up"
 
-    elif keyDown("downArrow"):
-        mario.move("down", 1)
+    if keyDown("downArrow"):
+        mario.move("down", deltaTime)
         game.move = "down"
 
-    elif keyDown("rightArrow"): 
+    if keyDown("rightArrow"): 
         mario.flipX = False
-        mario.move("right", 1)
+        mario.move("right", deltaTime)
         game.move = "right"
 
-    elif keyDown("leftArrow"): 
+    if keyDown("leftArrow"): 
         
         mario.flipX = True
-        mario.move("left", 1)
+        mario.move("left", deltaTime)
         game.move = "left"
     
     # draw to console
@@ -105,18 +118,10 @@ def process(game):
     # --------------- I RECOMMEND PUTTING ALL PRINT STATEMENTS AFTER OUTPUTING LAYERS ---------------------------
 
     # debugging stuff
-    time.sleep(0.0015) # control framerate
-    now = time.time()
-    dt = now - game.prevTime
-    game.prevTime = now
-    if dt > 0:
-        currentFPS = 1 / dt
-        game.FPS = 0.9 * game.FPS + 0.1 * currentFPS
-
     game.textbox.text = [
         f"FPS: {game.FPS:.2f}",
         f"X: {mario.pos.x} Y: {mario.pos.y}",
-        f"move: {game.move}",
+        f"deltaTime: {deltaTime}",
         "click 'q' to quit",
     ]
 
