@@ -92,9 +92,9 @@ class PixelSprite(Layer):
         fg = frame[y*2][x]
         bg = frame[y*2+1][x]
         if self.screen.colorMode == 8:
-            return f"\033[3{fg}m\033[4{bg}m{self.uhb}\033[0m"
+            return f"\033[3{fg}m;[4{bg}m{self.uhb}"
         elif self.screen.colorMode == 256:
-            return f"\033[38;5;{fg}m\033[48;5;{bg}m{self.uhb}\033[0m"
+            return f"\033[38;5;{fg};48;5;{bg}m{self.uhb}"
         else:
             raise ValueError("ERROR: Invalid color mode, colorMode should be either 8 or 256")
 
@@ -121,24 +121,11 @@ class PixelSprite(Layer):
 
     def draw(self): # convert array to ansi & print it
         self.rendered_frame = self.render_frame()
-        lines = []
-
-        ## pixels
-        for y in range(len(self.rendered_frame) // 2):
-            chars = ""
-            for x in range(len(self.rendered_frame[y])):
-                # print(x, y)
-                chars += self.render_char(x, y)
-            lines.append(chars)
-        # sys.stdout.write("\033[2J")
-        sys.stdout.write("\033[H")
-        sys.stdout.write(f"\033[{self.pos.y};{self.pos.x}H")
-        width = len(lines[0])
-        for l in lines:
-            sys.stdout.write(l)
-            sys.stdout.write(f"\033[1E\033[{self.pos.x-1}C")
+        sys.stdout.write(f"\033[H{"\n".join([
+            "".join(self.render_char(x, y) for x in range(len(self.rendered_frame[y])))
+            for y in range(len(self.rendered_frame) // 2)
+        ])}\033[0m")
         sys.stdout.flush()
-        # print(f"\033[{(self.screen.height / 2)+2};1H\033[0J", end="")
 
 class TextSprite(Layer):
 
