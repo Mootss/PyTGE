@@ -195,14 +195,13 @@ class FillBox(PixelSprite):
 class TextToSprite(PixelSprite):
     #       caseSensitive\
     #       add more fonts
-    def __init__(self, pos, text, font, color=1, wordSpace=5, charSpace=1):
+    def __init__(self, pos, text, font, color=0, wordSpace=5, charSpace=1):
         # wordSpace = space between words, charSpace = space between characters
         self.text = str(text)
         self.font = font
         self.color = color
         self.wordSpace = wordSpace
         self.charSpace = charSpace
-        print(f"space: {self.wordSpace} - {self.charSpace}")
         super().__init__(pos, frames=(self.renderText(),))
 
     def renderText(self):
@@ -423,7 +422,6 @@ class InputHandler():
         for key in inputKeys:
             if key.lower() not in self.virtualKeyCodeMap:
                 raise ValueError(f"Key '{key}' was not found, pleaes check spelling and / or if given keys exists in virtualKeyCodeMap")
-        #self.inputKeys = list(map(self.virtualKeyCodeMap.get, inputKeys))
         self.keyStates = {str(key).lower(): False for key in inputKeys}
         self.getAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
 
@@ -447,42 +445,3 @@ class InputHandler():
             if self.keyStates[k]:
                 return True
         
-
-# input handling, stole this from stackoverflow heh
-# arrow keys = H P M K (windows), A B C D (unix)
-# if os.name == 'nt':  # Windows
-#     import msvcrt
-
-#     def getKey():
-#         if msvcrt.kbhit():  # Only read if a key was pressed
-#             first = msvcrt.getch()
-#             if first in {b'\x00', b'\xe0'}:  # Special key (arrows, etc.)
-#                 second = msvcrt.getch()
-#                 return second.decode('utf-8', errors='ignore')
-#             else:
-#                 return first.decode('utf-8', errors='ignore')
-#         return None  # No key pressed
-
-# else:  # Unix (Linux, macOS)
-#     import tty
-#     import termios
-#     import select
-
-#     def getKey():
-#         dr, _, _ = select.select([sys.stdin], [], [], 0)  # 0 = no wait
-#         if dr:
-#             fd = sys.stdin.fileno()
-#             old_settings = termios.tcgetattr(fd)
-#             try:
-#                 tty.setraw(fd)
-#                 ch1 = sys.stdin.read(1)
-#                 if ch1 == '\x1b':  # Arrow keys
-#                     ch2 = sys.stdin.read(1)
-#                     ch3 = sys.stdin.read(1)
-#                     if ch2 == '[':
-#                         return ch3  # 'A'=up, 'B'=down, 'C'=right, 'D'=left
-#                 return ch1
-#             finally:
-#                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-#         return None  # No key pressed
- 
