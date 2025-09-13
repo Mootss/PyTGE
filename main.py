@@ -417,12 +417,12 @@ class InputHandler():
         "-": 0x6D
     }
 
-    def __init__(self, inputKeys):
+    def __init__(self, *inputKeys):
 
         for key in inputKeys:
             if key.lower() not in self.virtualKeyCodeMap:
                 raise ValueError(f"Key '{key}' was not found, pleaes check spelling and / or if given keys exists in virtualKeyCodeMap")
-        self.keyStates = {str(key).lower(): False for key in inputKeys}
+        self.keyStates = {str(key).lower(): False for key in list(inputKeys)}
         self.getAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
 
     def updateKeyStates(self):
@@ -433,12 +433,10 @@ class InputHandler():
                 self.keyStates[k] = True
             else: self.keyStates[k] = False 
 
-    def keyDown(self, keys):
-        if isinstance(keys, str):   
-            keys = [keys]
+    def keyDown(self, *keys):
         if not keys:
-            raise ValueError("keyDown keys list is empty")
-        keys = [k.lower() for k in keys]
+            raise ValueError("keyDown takes a required argument 'keys'")
+        keys = [k.lower() for k in list(keys)]
         for k in keys:
             if k not in self.keyStates:
                 raise ValueError(f"Given key '{k}' is not registered as an inputKey in the InputHandler")

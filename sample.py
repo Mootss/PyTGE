@@ -39,7 +39,7 @@ def ready(game):
     
     game.FPS = 1
     game.move = "Use arrow keys to move!"
-    game.input = InputHandler(["esc", "q", "upArrow", "downArrow", "rightArrow", "leftArrow"]) # add keys to track
+    game.input = InputHandler("esc", "q", "upArrow", "downArrow", "rightArrow", "leftArrow") # add keys to track
 
     class Mario(PixelSprite):
         def __init__(self, hp=3):
@@ -86,7 +86,7 @@ def process(game):
     # handle input
     game.input.updateKeyStates()
     keyDown = game.input.keyDown
-    if keyDown(["q", "esc"]): # check multiple
+    if keyDown("q", "esc"): # check multiple
         return True
 
     if keyDown("upArrow"): # check one
